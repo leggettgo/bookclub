@@ -1,0 +1,67 @@
+/* ---- Reset ---- */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ---- Base ---- */
+body {
+    background-color: white;
+    color: black;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+}
+
+a {
+    color: blue;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ---- Layout ---- */
+header, main, footer {
+    max-width: 600px;
+    width: 90%;
+    margin: 0 auto;
+}
+
+/* ---- Header ---- */
+header {
+    margin-top: 20px;
+    padding: 10px 0;
+}
+
+header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+nav {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+/* ---- Main ---- */
+main {
+    margin-top: 20px;
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+/* ---- Footer ---- */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: left;
+    font-size: 0.8em;
+    background-color: white;
+    padding: 10px;
+}
