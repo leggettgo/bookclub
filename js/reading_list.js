@@ -44,6 +44,8 @@ function renderYear(year) {
 
     for (let i = 0; i < 12; i++) {
         const books = byMonth[i] || [];
+        if (books.length === 0) continue;
+        
         const isEmpty = books.length === 0;
 
         html += `<div class="month-card${isEmpty ? ' empty' : ''}">`;
@@ -56,8 +58,7 @@ function renderYear(year) {
                 html += `<div class="book-cover-placeholder">${book.title}</div>`;
             }
 
-            html += `<h3>${book.title}</h3>`;
-            html += `<p class="book-author">${book.author}</p>`;
+            html += `<p class="book-byline"><strong><em>${book.title}</em></strong> by ${book.author}</p>`;
 
             if (book.host) {
                 html += `<p class="book-host">Hosted by ${book.host}</p>`;

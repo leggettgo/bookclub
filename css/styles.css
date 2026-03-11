@@ -48,6 +48,12 @@ nav {
 /* ---- Main ---- */
 main {
     margin-top: 20px;
+    padding-bottom: 3rem;
+}
+
+#current-book img {
+    display: block;
+    margin: 1rem 0;
 }
 
 section {
@@ -141,19 +147,18 @@ main.wide {
     color: #666;
 }
 
-.month-card h3 {
-    font-size: 0.95rem;
+.book-byline {
+    font-size: 0.9rem;
     margin-bottom: 0.2rem;
-    font-style: italic;
-}
-
-.month-card .book-author {
-    font-size: 0.85rem;
-    color: #555;
 }
 
 .month-card.empty .month-label {
     margin-bottom: 0;
+}
+
+.book-host {
+    font-size: 0.8rem;
+    color: #666;
 }
 
 /* ---- Responsive ---- */

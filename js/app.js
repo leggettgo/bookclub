@@ -16,12 +16,11 @@ async function loadCurrentBook() {
 
     let html = '';
 
+    html += `<p>Welcome to Book Club. We are currently reading <strong><em>${data.title}</em></strong> by ${data.author}.</p>`;
+
     if (data.cover_url) {
         html += `<img src="${data.cover_url}" alt="Cover of ${data.title}">`;
     }
-
-    html += `<h3>${data.title}</h3>`;
-    html += `<p>${data.author}</p>`;
 
     if (data.description) {
         html += `<p>${data.description}</p>`;
