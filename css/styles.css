@@ -65,3 +65,106 @@ footer {
     background-color: white;
     padding: 10px;
 }
+
+/* ---- Wide layout (reading list calendar) ---- */
+main.wide {
+    max-width: 960px;
+}
+
+/* ---- Year navigation ---- */
+#year-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+#year-nav button {
+    background: none;
+    border: 1px solid #ccc;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+#year-nav button:hover {
+    border-color: #333;
+}
+
+#current-year {
+    font-size: 1.2rem;
+}
+
+/* ---- Calendar grid ---- */
+#calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding-bottom: 3rem;
+}
+
+/* ---- Month card ---- */
+.month-card {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+}
+
+.month-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #999;
+    margin-bottom: 0.5rem;
+}
+
+/* ---- Book within a month card ---- */
+.book-cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.book-cover-placeholder {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.month-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+    font-style: italic;
+}
+
+.month-card .book-author {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.month-card.empty .month-label {
+    margin-bottom: 0;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+    #calendar-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+    #calendar-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
