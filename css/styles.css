@@ -61,6 +61,11 @@ section {
     margin-bottom: 20px;
 }
 
+/* ---- Password page ---- */
+#password-form {
+    margin-top: 1.5rem;
+}
+
 /* ---- Footer ---- */
 footer {
     position: fixed;
