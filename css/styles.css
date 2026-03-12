@@ -32,12 +32,11 @@ header, main, footer {
 /* ---- Header ---- */
 header {
     margin-top: 20px;
-    padding: 10px 0;
 }
 
 header h1 {
     font-size: clamp(1.5rem, 5vw, 2rem);
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 }
 
 nav {
