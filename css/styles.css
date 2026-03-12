@@ -176,8 +176,8 @@ header.wide {
     }
 }
 
-/* ---- Ops grid (Book Club Ops) ---- */
-#ops-grid {
+/* ---- Opps grid (Book Club Opps) ---- */
+#opps-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 0.75rem;
@@ -202,7 +202,7 @@ header.wide {
 }
 
 @media (max-width: 640px) {
-    #ops-grid {
+    #opps-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
