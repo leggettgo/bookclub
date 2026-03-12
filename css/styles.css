@@ -37,12 +37,13 @@ header {
 
 header h1 {
     font-size: clamp(1.5rem, 5vw, 2rem);
+    margin-top: 1rem;
 }
 
 nav {
     display: flex;
     gap: 15px;
-    margin-top: 10px;
+    flex-wrap: wrap;
 }
 
 /* ---- Main ---- */
@@ -73,7 +74,8 @@ footer {
 }
 
 /* ---- Wide layout (reading list calendar) ---- */
-main.wide {
+main.wide,
+header.wide {
     max-width: 960px;
 }
 
@@ -120,7 +122,7 @@ main.wide {
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #999;
+    color: #777;
     margin-bottom: 0.5rem;
 }
 
