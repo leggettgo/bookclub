@@ -41,8 +41,12 @@ header h1 {
 
 nav {
     display: flex;
-    gap: 15px;
+    gap: 10px;
     flex-wrap: wrap;
+}
+
+nav a::before {
+    content: "🔻 ";
 }
 
 /* ---- Main ---- */
@@ -59,6 +63,16 @@ main {
 
 section {
     margin-bottom: 20px;
+}
+
+/* ---- Resources list ---- */
+#resources-list {
+    list-style: none;
+    padding: 0;
+}
+
+#resources-list li::before {
+    content: "🔻 ";
 }
 
 /* ---- Password page ---- */
@@ -189,7 +203,7 @@ header.wide {
 }
 
 .op-photo-placeholder,
-.member-photo {
+.opp-photo {
     width: 100%;
     aspect-ratio: 1/1;
     object-fit: cover;
@@ -198,6 +212,10 @@ header.wide {
 
 .op-photo-placeholder {
     background-color: #f0f0f0;
+}
+
+.has-border {
+    border: 1px solid #ccc;
 }
 
 .op-label {
