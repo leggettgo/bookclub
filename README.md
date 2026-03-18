@@ -4,7 +4,7 @@ A simple website for a book club, built incrementally with HTML, CSS, and JavaSc
 
 ## Features
 
-1. **Reading List** — tracks books the club has read or is currently reading, with title, author, date, host, and description. The landing page highlights the current book; past books are on a separate calendar grid page organised by month and year.
+1. **Reading Archive** — tracks books the club has read or is currently reading, with title, author, date, host, and description. The landing page highlights the current book; past books are on a separate calendar grid page organised by month and year.
 2. **Book Club Ops** — member photo grid with labels.
 3. **Community Library** — (coming soon) a catalogue of books members own and are willing to lend, with tags for searching/filtering.
 4. **Resources** — (coming soon)
