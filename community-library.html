@@ -21,11 +21,86 @@
     </header>
 
     <main>
-        <p>Coming soon.</p>
+        <div id="library-controls">
+            <div id="filter-wrapper">
+                <button id="filter-btn">Filter</button>
+                <div id="filter-dropdown" class="hidden">
+                    <div class="filter-section" id="section-genres">
+                        <p class="filter-section-label">Genre</p>
+                        <div id="filter-genres"></div>
+                    </div>
+                    <div class="filter-section" id="section-tags">
+                        <p class="filter-section-label">Tags</p>
+                        <div id="filter-tags"></div>
+                    </div>
+                    <div class="filter-section" id="section-niche-tags">
+                        <p class="filter-section-label">Niche Tags</p>
+                        <div id="filter-niche-tags"></div>
+                    </div>
+                    <div class="filter-section" id="section-owners">
+                        <p class="filter-section-label">Owner</p>
+                        <div id="filter-owners"></div>
+                    </div>
+                </div>
+            </div>
+            <button id="add-book-btn">+ Add a book</button>
+        </div>
+        <div id="active-filters"></div>
+        <div id="library-grid"></div>
     </main>
+
+    <!-- Add book modal -->
+    <div id="add-modal" class="modal hidden">
+        <div class="modal-content">
+            <button id="modal-close" class="modal-close">×</button>
+            <h2>Add a book</h2>
+            <input id="book-search" type="text" placeholder="Search by title..." autocomplete="off">
+            <div id="search-results"></div>
+            <form id="add-book-form" class="hidden">
+                <div id="selected-book-preview"></div>
+                <label for="input-owner">Owner</label>
+                <input type="text" id="input-owner" placeholder="Who owns this book?">
+                <label>Genres</label>
+                <div class="tag-selector" id="genres-selector">
+                    <div class="tag-selector-field" id="genres-field">
+                        <div id="genres-chips"></div>
+                        <span class="tag-selector-placeholder" id="genres-placeholder">Select genres...</span>
+                    </div>
+                    <div class="tag-selector-dropdown hidden" id="genres-dropdown"></div>
+                </div>
+                <label>Tags</label>
+                <div class="tag-selector" id="tags-selector">
+                    <div class="tag-selector-field" id="tags-field">
+                        <div id="tags-chips"></div>
+                        <span class="tag-selector-placeholder" id="tags-placeholder">Select tags...</span>
+                    </div>
+                    <div class="tag-selector-dropdown hidden" id="tags-dropdown"></div>
+                </div>
+                <label>Niche Tags</label>
+                <div class="tag-selector" id="niche-selector">
+                    <div class="tag-selector-field" id="niche-field">
+                        <div id="niche-chips"></div>
+                        <span class="tag-selector-placeholder" id="niche-placeholder">Select niche tags...</span>
+                    </div>
+                    <div class="tag-selector-dropdown hidden" id="niche-dropdown"></div>
+                </div>
+                <button type="submit" id="submit-book-btn">Add to Library</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Undo toast -->
+    <div id="undo-toast" class="hidden">
+        <span id="toast-msg"></span>
+        <button id="undo-btn">Undo</button>
+    </div>
 
     <footer>
         <p>Book Club 2026</p>
     </footer>
+
+    <script src="js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/community_library.js"></script>
 </body>
 </html>
