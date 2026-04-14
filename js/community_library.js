@@ -35,7 +35,7 @@ const TAGS = [
 const NICHE_TAGS = [
     'ACAB', 'Cannibalism', 'Character Driven', 'Character Study', 'Cults',
     'DnD', 'Dragons', 'Drugs & Drug Use', 'Female Protagonist', 'Female Rage',
-    'Ghosts', 'Greek Pantheon', 'Kinks [can be specified further]', 'Medieval',
+    'Ghosts', 'Greek Pantheon', 'Kinks', 'Medieval',
     'Miscommunication', 'Multi-Generational', 'Murder', 'Overpowered Protagonist',
     'Plot Twist', 'Police Brutality', 'Quest', 'Robots', 'Secret Society',
     'Sex Work', 'Trauma', 'Underdog', 'Unlikable Characters',
@@ -251,6 +251,8 @@ function resetModal() {
     document.getElementById('input-owner').value = '';
     tagState = { genres: [], tags: [], niche_tags: [] };
     document.querySelectorAll('.tag-selector-dropdown .tag-tile').forEach(t => t.classList.remove('selected'));
+    document.querySelectorAll('.tag-search-input').forEach(i => { i.value = ''; });
+    document.querySelectorAll('.tag-tile').forEach(t => t.classList.remove('hidden'));
     renderTagChips('genres');
     renderTagChips('tags');
     renderTagChips('niche_tags');
@@ -269,12 +271,43 @@ async function searchOpenLibrary(query) {
     resultsEl.innerHTML = '<p class="search-loading">Searching...</p>';
     resultsEl.classList.remove('hidden');
 
-    const url = `https://openlibrary.org/search.json?title=${encodeURIComponent(query)}&limit=8&fields=title,author_name,cover_i,key`;
+    try {
+        const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=8&fields=title,author_name,cover_i,key`);
+        const json = await res.json();
+        const results = (json.docs || []).map(r => ({
+            title:     r.title,
+            author:    (r.author_name || ['Unknown']).join(', '),
+            cover_url: r.cover_i ? `https://covers.openlibrary.org/b/id/${r.cover_i}-M.jpg` : null,
+            thumb_url: r.cover_i ? `https://covers.openlibrary.org/b/id/${r.cover_i}-S.jpg` : null
+        }));
+
+        if (results.length > 0) {
+            renderSearchResults(results);
+        } else {
+            await searchGoogleBooks(query);
+        }
+    } catch {
+        await searchGoogleBooks(query);
+    }
+}
+
+async function searchGoogleBooks(query) {
+    const resultsEl = document.getElementById('search-results');
+    resultsEl.innerHTML = '<p class="search-loading">Trying Google Books...</p>';
 
     try {
-        const res  = await fetch(url);
+        const res  = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8`);
         const json = await res.json();
-        renderSearchResults(json.docs || []);
+        const results = (json.items || []).map(item => {
+            const info = item.volumeInfo || {};
+            return {
+                title:     info.title || 'Unknown',
+                author:    (info.authors || ['Unknown']).join(', '),
+                cover_url: info.imageLinks?.thumbnail?.replace('http://', 'https://') || null,
+                thumb_url: info.imageLinks?.smallThumbnail?.replace('http://', 'https://') || null
+            };
+        });
+        renderSearchResults(results);
     } catch {
         resultsEl.innerHTML = '<p class="search-loading">Search failed. Try again.</p>';
     }
@@ -291,13 +324,13 @@ function renderSearchResults(results) {
     container._results = results;
     container.innerHTML = results.map((r, i) => `
         <div class="search-result" data-index="${i}">
-            ${r.cover_i
-                ? `<img src="https://covers.openlibrary.org/b/id/${r.cover_i}-S.jpg" alt="">`
+            ${r.thumb_url
+                ? `<img src="${escHtml(r.thumb_url)}" alt="">`
                 : `<div class="result-no-cover"></div>`
             }
             <div>
                 <p class="result-title">${escHtml(r.title)}</p>
-                <p class="result-author">${escHtml((r.author_name || ['Unknown']).join(', '))}</p>
+                <p class="result-author">${escHtml(r.author)}</p>
             </div>
         </div>
     `).join('');
@@ -310,10 +343,8 @@ function renderSearchResults(results) {
 function selectSearchResult(result) {
     selectedBookData = {
         title:     result.title,
-        author:    (result.author_name || ['Unknown']).join(', '),
-        cover_url: result.cover_i
-            ? `https://covers.openlibrary.org/b/id/${result.cover_i}-M.jpg`
-            : null
+        author:    result.author,
+        cover_url: result.cover_url
     };
 
     document.getElementById('search-results').innerHTML = '';
@@ -321,13 +352,13 @@ function selectSearchResult(result) {
     document.getElementById('book-search').value = '';
 
     document.getElementById('selected-book-preview').innerHTML = `
-        ${selectedBookData.cover_url
-            ? `<img src="${escHtml(selectedBookData.cover_url)}" alt="Cover" class="preview-cover">`
+        ${result.cover_url
+            ? `<img src="${escHtml(result.cover_url)}" alt="Cover" class="preview-cover">`
             : ''
         }
         <div>
-            <p><strong>${escHtml(selectedBookData.title)}</strong></p>
-            <p>${escHtml(selectedBookData.author)}</p>
+            <p><strong>${escHtml(result.title)}</strong></p>
+            <p>${escHtml(result.author)}</p>
         </div>
     `;
 
@@ -341,9 +372,23 @@ function setupTagSelector(fieldId, dropdownId, category, options) {
     const field    = document.getElementById(fieldId);
     const dropdown = document.getElementById(dropdownId);
 
-    dropdown.innerHTML = options.map(opt => `
-        <span class="tag-tile" data-category="${category}" data-value="${escHtml(opt)}">${escHtml(opt)}</span>
-    `).join('');
+    dropdown.innerHTML = `
+        <input type="text" class="tag-search-input" placeholder="Search...">
+        <div class="tag-tiles-container">
+            ${options.map(opt => `
+                <span class="tag-tile" data-category="${category}" data-value="${escHtml(opt)}">${escHtml(opt)}</span>
+            `).join('')}
+        </div>
+    `;
+
+    const searchInput = dropdown.querySelector('.tag-search-input');
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+        dropdown.querySelectorAll('.tag-tile').forEach(tile => {
+            tile.classList.toggle('hidden', !tile.dataset.value.toLowerCase().includes(query));
+        });
+    });
+    searchInput.addEventListener('click', e => e.stopPropagation());
 
     field.addEventListener('click', e => {
         e.stopPropagation();
@@ -351,6 +396,7 @@ function setupTagSelector(fieldId, dropdownId, category, options) {
             if (id !== dropdownId) document.getElementById(id).classList.add('hidden');
         });
         dropdown.classList.toggle('hidden');
+        if (!dropdown.classList.contains('hidden')) searchInput.focus();
     });
 
     dropdown.querySelectorAll('.tag-tile').forEach(tile => {
@@ -416,7 +462,7 @@ async function submitBook(e) {
     btn.textContent = 'Adding...';
     btn.disabled = true;
 
-    const { data, error } = await db
+    const { error } = await db
         .from('community_library')
         .insert({
             title:      selectedBookData.title,
@@ -426,9 +472,7 @@ async function submitBook(e) {
             genres:     tagState.genres,
             tags:       tagState.tags,
             niche_tags: tagState.niche_tags
-        })
-        .select()
-        .single();
+        });
 
     if (error) {
         console.error(error);
@@ -437,10 +481,8 @@ async function submitBook(e) {
         return;
     }
 
-    allBooks = [data, ...allBooks];
-    buildFilterDropdown();
-    renderBooks();
     closeModal();
+    await loadBooks();
 }
 
 // ---- Utils ----
