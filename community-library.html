@@ -89,6 +89,44 @@
         </div>
     </div>
 
+    <!-- Detail modal -->
+    <div id="detail-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" id="detail-modal-close">×</button>
+            <div id="detail-body"></div>
+            <div id="detail-edit-section" class="hidden">
+                <label>Genres</label>
+                <div class="tag-selector" id="edit-genres-selector">
+                    <div class="tag-selector-field" id="edit-genres-field">
+                        <div id="edit-genres-chips"></div>
+                        <span class="tag-selector-placeholder" id="edit-genres-placeholder">Select genres...</span>
+                    </div>
+                    <div class="tag-selector-dropdown hidden" id="edit-genres-dropdown"></div>
+                </div>
+                <label>Tags</label>
+                <div class="tag-selector" id="edit-tags-selector">
+                    <div class="tag-selector-field" id="edit-tags-field">
+                        <div id="edit-tags-chips"></div>
+                        <span class="tag-selector-placeholder" id="edit-tags-placeholder">Select tags...</span>
+                    </div>
+                    <div class="tag-selector-dropdown hidden" id="edit-tags-dropdown"></div>
+                </div>
+                <label>Niche Tags</label>
+                <div class="tag-selector" id="edit-niche-selector">
+                    <div class="tag-selector-field" id="edit-niche-field">
+                        <div id="edit-niche-chips"></div>
+                        <span class="tag-selector-placeholder" id="edit-niche-placeholder">Select niche tags...</span>
+                    </div>
+                    <div class="tag-selector-dropdown hidden" id="edit-niche-dropdown"></div>
+                </div>
+                <div class="edit-actions">
+                    <button id="save-tags-btn">Save</button>
+                    <button id="cancel-edit-btn" type="button">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Undo toast -->
     <div id="undo-toast" class="hidden">
         <span id="toast-msg"></span>

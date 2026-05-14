@@ -238,14 +238,6 @@ header.wide {
     margin-bottom: 0.3rem;
 }
 
-.filter-option {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-    padding: 0.1rem 0;
-}
 
 #active-filters {
     display: flex;
@@ -380,6 +372,92 @@ header.wide {
 
 .modal-close:hover {
     color: black;
+}
+
+/* ---- Detail modal ---- */
+.detail-layout {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.detail-cover img {
+    width: 110px;
+    display: block;
+}
+
+.detail-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.detail-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+}
+
+.detail-author {
+    color: #555;
+    margin-bottom: 0.4rem;
+}
+
+.detail-owner {
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 1rem;
+}
+
+.detail-section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #777;
+    margin: 0.6rem 0 0.3rem;
+}
+
+.detail-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+#detail-edit-btn {
+    margin-top: 1rem;
+    background: none;
+    border: 1px solid #ccc;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+#detail-edit-btn:hover {
+    border-color: #333;
+}
+
+#detail-edit-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.edit-actions button {
+    background: none;
+    border: 1px solid #ccc;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.edit-actions button:hover {
+    border-color: #333;
 }
 
 #book-search {

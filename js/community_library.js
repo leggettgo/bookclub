@@ -95,8 +95,51 @@ function renderBooks() {
     `).join('');
 
     grid.querySelectorAll('.card-delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => initiateDelete(parseInt(btn.dataset.id)));
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            initiateDelete(parseInt(btn.dataset.id));
+        });
     });
+
+    grid.querySelectorAll('.library-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const book = allBooks.find(b => b.id === parseInt(card.dataset.id));
+            if (book) openDetailModal(book);
+        });
+    });
+}
+
+function openDetailModal(book) {
+    const makeTiles = arr => (arr || []).map(v => `<span class="tag-tile">${escHtml(v)}</span>`).join('');
+
+    const genreTiles = makeTiles(book.genres);
+    const tagTiles   = makeTiles(book.tags);
+    const nicheTiles = makeTiles(book.niche_tags);
+
+    document.getElementById('detail-body').innerHTML = `
+        <div class="detail-layout">
+            <div class="detail-cover">
+                ${book.cover_url
+                    ? `<img src="${escHtml(book.cover_url)}" alt="${escHtml(book.title)}">`
+                    : `<div class="library-cover-placeholder"></div>`}
+            </div>
+            <div class="detail-info">
+                <h2 class="detail-title">${escHtml(book.title)}</h2>
+                <p class="detail-author">${escHtml(book.author)}</p>
+                <p class="detail-owner">Owned by ${escHtml(book.owner || 'Unknown')}</p>
+            </div>
+        </div>
+        <div id="detail-tags-display">
+            ${genreTiles ? `<p class="detail-section-label">Genres</p><div class="detail-tiles">${genreTiles}</div>` : ''}
+            ${tagTiles   ? `<p class="detail-section-label">Tags</p><div class="detail-tiles">${tagTiles}</div>`   : ''}
+            ${nicheTiles ? `<p class="detail-section-label">Niche Tags</p><div class="detail-tiles">${nicheTiles}</div>` : ''}
+        </div>
+        <button id="detail-edit-btn">Edit tags</button>
+    `;
+
+    document.getElementById('detail-edit-btn').addEventListener('click', () => openEditMode(book));
+    document.getElementById('detail-edit-section').classList.add('hidden');
+    document.getElementById('detail-modal').classList.remove('hidden');
 }
 
 function getFilteredBooks() {
@@ -134,21 +177,22 @@ function renderFilterSection(containerId, sectionId, category, values) {
 
     section.classList.remove('hidden');
     container.innerHTML = values.map(v => `
-        <label class="filter-option">
-            <input type="checkbox" data-category="${category}" data-value="${escHtml(v)}"
-                ${activeFilters[category].includes(v) ? 'checked' : ''}>
+        <span class="tag-tile${activeFilters[category].includes(v) ? ' selected' : ''}"
+              data-category="${category}" data-value="${escHtml(v)}">
             ${escHtml(v)}
-        </label>
+        </span>
     `).join('');
 
-    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => {
-            const cat = cb.dataset.category;
-            const val = cb.dataset.value;
-            if (cb.checked) {
-                activeFilters[cat].push(val);
-            } else {
+    container.querySelectorAll('.tag-tile').forEach(tile => {
+        tile.addEventListener('click', () => {
+            const cat = tile.dataset.category;
+            const val = tile.dataset.value;
+            if (activeFilters[cat].includes(val)) {
                 activeFilters[cat] = activeFilters[cat].filter(v => v !== val);
+                tile.classList.remove('selected');
+            } else {
+                activeFilters[cat].push(val);
+                tile.classList.add('selected');
             }
             updateActiveFilterChips();
             renderBooks();
@@ -173,8 +217,8 @@ function updateActiveFilterChips() {
             const cat = btn.dataset.cat;
             const val = btn.dataset.val;
             activeFilters[cat] = activeFilters[cat].filter(v => v !== val);
-            const cb = document.querySelector(`#filter-dropdown input[data-category="${cat}"][data-value="${val}"]`);
-            if (cb) cb.checked = false;
+            const tile = document.querySelector(`#filter-dropdown .tag-tile[data-category="${cat}"][data-value="${val}"]`);
+            if (tile) tile.classList.remove('selected');
             updateActiveFilterChips();
             renderBooks();
         });
@@ -366,6 +410,142 @@ function selectSearchResult(result) {
     document.getElementById('input-owner').focus();
 }
 
+// ---- Edit Tag State ----
+
+let editTagState    = { genres: [], tags: [], niche_tags: [] };
+let currentEditBook = null;
+
+function openEditMode(book) {
+    currentEditBook = book;
+    editTagState = {
+        genres:     [...(book.genres     || [])],
+        tags:       [...(book.tags        || [])],
+        niche_tags: [...(book.niche_tags || [])]
+    };
+
+    const dropdownIds = { genres: 'edit-genres-dropdown', tags: 'edit-tags-dropdown', niche_tags: 'edit-niche-dropdown' };
+    ['genres', 'tags', 'niche_tags'].forEach(cat => {
+        document.querySelectorAll(`#${dropdownIds[cat]} .tag-tile`).forEach(tile => {
+            tile.classList.toggle('selected', editTagState[cat].includes(tile.dataset.value));
+        });
+        renderEditTagChips(cat);
+    });
+
+    document.getElementById('detail-tags-display').classList.add('hidden');
+    document.getElementById('detail-edit-btn').classList.add('hidden');
+    document.getElementById('detail-edit-section').classList.remove('hidden');
+}
+
+function cancelEditMode() {
+    document.getElementById('detail-edit-section').classList.add('hidden');
+    document.getElementById('detail-tags-display').classList.remove('hidden');
+    document.getElementById('detail-edit-btn').classList.remove('hidden');
+}
+
+async function saveTagEdits() {
+    const btn = document.getElementById('save-tags-btn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    const { error } = await db
+        .from('community_library')
+        .update({
+            genres:     editTagState.genres,
+            tags:       editTagState.tags,
+            niche_tags: editTagState.niche_tags
+        })
+        .eq('id', currentEditBook.id);
+
+    if (error) {
+        console.error(error);
+        btn.textContent = 'Save';
+        btn.disabled = false;
+        return;
+    }
+
+    const idx = allBooks.findIndex(b => b.id === currentEditBook.id);
+    if (idx !== -1) allBooks[idx] = { ...allBooks[idx], ...editTagState };
+    buildFilterDropdown();
+    renderBooks();
+    openDetailModal(allBooks[idx]);
+}
+
+function renderEditTagChips(category) {
+    const chipsIds   = { genres: 'edit-genres-chips',       tags: 'edit-tags-chips',       niche_tags: 'edit-niche-chips' };
+    const phIds      = { genres: 'edit-genres-placeholder', tags: 'edit-tags-placeholder', niche_tags: 'edit-niche-placeholder' };
+    const dropIds    = { genres: 'edit-genres-dropdown',    tags: 'edit-tags-dropdown',    niche_tags: 'edit-niche-dropdown' };
+
+    const container   = document.getElementById(chipsIds[category]);
+    const placeholder = document.getElementById(phIds[category]);
+
+    container.innerHTML = editTagState[category].map(v => `
+        <span class="tag-chip">${escHtml(v)}
+            <button type="button" class="chip-remove-btn" data-cat="${category}" data-val="${escHtml(v)}">×</button>
+        </span>
+    `).join('');
+
+    if (placeholder) placeholder.classList.toggle('hidden', editTagState[category].length > 0);
+
+    container.querySelectorAll('.chip-remove-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            const cat = btn.dataset.cat;
+            const val = btn.dataset.val;
+            editTagState[cat] = editTagState[cat].filter(v => v !== val);
+            const tile = document.querySelector(`#${dropIds[cat]} .tag-tile[data-value="${val}"]`);
+            if (tile) tile.classList.remove('selected');
+            renderEditTagChips(cat);
+        });
+    });
+}
+
+function setupEditTagSelector(fieldId, dropdownId, category, options) {
+    const field    = document.getElementById(fieldId);
+    const dropdown = document.getElementById(dropdownId);
+
+    dropdown.innerHTML = `
+        <input type="text" class="tag-search-input" placeholder="Search...">
+        <div class="tag-tiles-container">
+            ${options.map(opt => `
+                <span class="tag-tile" data-category="${category}" data-value="${escHtml(opt)}">${escHtml(opt)}</span>
+            `).join('')}
+        </div>
+    `;
+
+    const searchInput = dropdown.querySelector('.tag-search-input');
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+        dropdown.querySelectorAll('.tag-tile').forEach(tile => {
+            tile.classList.toggle('hidden', !tile.dataset.value.toLowerCase().includes(query));
+        });
+    });
+    searchInput.addEventListener('click', e => e.stopPropagation());
+
+    field.addEventListener('click', e => {
+        e.stopPropagation();
+        ['edit-genres-dropdown', 'edit-tags-dropdown', 'edit-niche-dropdown'].forEach(id => {
+            if (id !== dropdownId) document.getElementById(id).classList.add('hidden');
+        });
+        dropdown.classList.toggle('hidden');
+        if (!dropdown.classList.contains('hidden')) searchInput.focus();
+    });
+
+    dropdown.querySelectorAll('.tag-tile').forEach(tile => {
+        tile.addEventListener('click', e => {
+            e.stopPropagation();
+            const val = tile.dataset.value;
+            if (editTagState[category].includes(val)) {
+                editTagState[category] = editTagState[category].filter(v => v !== val);
+                tile.classList.remove('selected');
+            } else {
+                editTagState[category].push(val);
+                tile.classList.add('selected');
+            }
+            renderEditTagChips(category);
+        });
+    });
+}
+
 // ---- Tag Selectors ----
 
 function setupTagSelector(fieldId, dropdownId, category, options) {
@@ -509,7 +689,7 @@ document.addEventListener('click', e => {
         document.getElementById('filter-dropdown').classList.add('hidden');
     }
     // Close tag selector dropdowns
-    ['genres-selector', 'tags-selector', 'niche-selector'].forEach(id => {
+    ['genres-selector', 'tags-selector', 'niche-selector', 'edit-genres-selector', 'edit-tags-selector', 'edit-niche-selector'].forEach(id => {
         const selector = document.getElementById(id);
         if (selector && !selector.contains(e.target)) {
             selector.querySelector('.tag-selector-dropdown').classList.add('hidden');
@@ -519,10 +699,21 @@ document.addEventListener('click', e => {
 
 document.getElementById('add-book-btn').addEventListener('click', openModal);
 document.getElementById('modal-close').addEventListener('click', closeModal);
-
 document.getElementById('add-modal').addEventListener('click', e => {
     if (e.target === document.getElementById('add-modal')) closeModal();
 });
+
+function closeDetailModal() {
+    document.getElementById('detail-modal').classList.add('hidden');
+    document.getElementById('detail-edit-section').classList.add('hidden');
+}
+
+document.getElementById('detail-modal-close').addEventListener('click', closeDetailModal);
+document.getElementById('detail-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('detail-modal')) closeDetailModal();
+});
+document.getElementById('save-tags-btn').addEventListener('click', saveTagEdits);
+document.getElementById('cancel-edit-btn').addEventListener('click', cancelEditMode);
 
 document.getElementById('book-search').addEventListener('input', e => {
     clearTimeout(searchTimeout);
@@ -538,5 +729,9 @@ document.getElementById('undo-btn').addEventListener('click', undoDelete);
 setupTagSelector('genres-field', 'genres-dropdown', 'genres',     GENRES);
 setupTagSelector('tags-field',   'tags-dropdown',   'tags',       TAGS);
 setupTagSelector('niche-field',  'niche-dropdown',  'niche_tags', NICHE_TAGS);
+
+setupEditTagSelector('edit-genres-field', 'edit-genres-dropdown', 'genres',     GENRES);
+setupEditTagSelector('edit-tags-field',   'edit-tags-dropdown',   'tags',       TAGS);
+setupEditTagSelector('edit-niche-field',  'edit-niche-dropdown',  'niche_tags', NICHE_TAGS);
 
 loadBooks();
